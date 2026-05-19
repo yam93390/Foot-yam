@@ -1,0 +1,56 @@
+let score = 0;
+
+// Positions de départ (en pourcentage du terrain)
+let joueurX = 15;
+let joueurY = 45;
+
+let ballonX = 48;
+let ballonY = 48;
+
+const joueur = document.getElementById('joueur');
+const ballon = document.getElementById('ballon');
+const scoreDisplay = document.getElementById('score');
+
+// Mettre à jour l'affichage sur l'écran
+function actualiserPositions() {
+    joueur.style.left = joueurX + '%';
+    joueur.style.top = joueurY + '%';
+    ballon.style.left = ballonX + '%';
+    ballon.style.top = ballonY + '%';
+}
+
+function bouger(direction) {
+    let vitesseBottes = 6; // Vitesse rapide grâce aux bottes !
+
+    if (direction === 'haut' && joueurY > 5) joueurY -= vitesseBottes;
+    if (direction === 'bas' && joueurY < 85) joueurY += vitesseBottes;
+    if (direction === 'gauche' && joueurX > 3) joueurX -= vitesseBottes;
+    if (direction === 'droite' && joueurX < 92) joueurX += vitesseBottes;
+
+    // Vérifier si le joueur touche le ballon
+    let distanceX = Math.abs(joueurX - ballonX);
+    let distanceY = Math.abs(joueurY - ballonY);
+
+    if (distanceX < 6 && distanceY < 6) {
+        // Le joueur pousse le ballon dans sa direction
+        if (direction === 'haut' && ballonY > 5) ballonY -= 12;
+        if (direction === 'bas' && ballonY < 85) ballonY += 12;
+        if (direction === 'gauche' && ballonX > 3) ballonX -= 12;
+        if (direction === 'droite' && ballonX < 92) ballonX += 12;
+        
+        // Vérifier si le ballon entre dans le but (à droite entre 32% et 68% de hauteur)
+        if (ballonX >= 90 && ballonY >= 32 && ballonY <= 68) {
+            score++;
+            scoreDisplay.innerText = score;
+            alert("⚽ GOAL AVEC LES BOTTES !");
+            // Réinitialisation au centre
+            joueurX = 15; joueurY = 45;
+            ballonX = 48; ballonY = 48;
+        }
+    }
+
+    actualiserPositions();
+}
+
+// Lancement initial au chargement de la page
+actualiserPositions();
