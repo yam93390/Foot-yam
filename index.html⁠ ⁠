@@ -1,56 +1,209 @@
-let score = 0;
-
-// Positions de départ (en pourcentage du terrain)
-let joueurX = 15;
-let joueurY = 45;
-
-let ballonX = 48;
-let ballonY = 48;
-
-const joueur = document.getElementById('joueur');
-const ballon = document.getElementById('ballon');
-const scoreDisplay = document.getElementById('score');
-
-// Mettre à jour l'affichage sur l'écran
-function actualiserPositions() {
-    joueur.style.left = joueurX + '%';
-    joueur.style.top = joueurY + '%';
-    ballon.style.left = ballonX + '%';
-    ballon.style.top = ballonY + '%';
-}
-
-function bouger(direction) {
-    let vitesseBottes = 6; // Vitesse rapide grâce aux bottes !
-
-    if (direction === 'haut' && joueurY > 5) joueurY -= vitesseBottes;
-    if (direction === 'bas' && joueurY < 85) joueurY += vitesseBottes;
-    if (direction === 'gauche' && joueurX > 3) joueurX -= vitesseBottes;
-    if (direction === 'droite' && joueurX < 92) joueurX += vitesseBottes;
-
-    // Vérifier si le joueur touche le ballon
-    let distanceX = Math.abs(joueurX - ballonX);
-    let distanceY = Math.abs(joueurY - ballonY);
-
-    if (distanceX < 6 && distanceY < 6) {
-        // Le joueur pousse le ballon dans sa direction
-        if (direction === 'haut' && ballonY > 5) ballonY -= 12;
-        if (direction === 'bas' && ballonY < 85) ballonY += 12;
-        if (direction === 'gauche' && ballonX > 3) ballonX -= 12;
-        if (direction === 'droite' && ballonX < 92) ballonX += 12;
-        
-        // Vérifier si le ballon entre dans le but (à droite entre 32% et 68% de hauteur)
-        if (ballonX >= 90 && ballonY >= 32 && ballonY <= 68) {
-            score++;
-            scoreDisplay.innerText = score;
-            alert("⚽ GOAL AVEC LES BOTTES !");
-            // Réinitialisation au centre
-            joueurX = 15; joueurY = 45;
-            ballonX = 48; ballonY = 48;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Jeu de Foot - Bottes de Vitesse</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
         }
-    }
 
-    actualiserPositions();
-}
+        #score-board {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
 
-// Lancement initial au chargement de la page
-actualiserPositions();
+        /* Le Terrain de Foot */
+        #terrain {
+            position: relative;
+            width: 90vw;
+            height: 50vh;
+            background-color: #4CAF50;
+            border: 4px solid white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Ligne centrale */
+        #terrain::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background-color: white;
+            transform: translateX(-50%);
+        }
+
+        /* Le But à droite */
+        #but {
+            position: absolute;
+            right: 0;
+            top: 30%;
+            width: 20px;
+            height: 40%;
+            border-left: 4px solid white;
+            border-top: 4px solid white;
+            border-bottom: 4px solid white;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Le Joueur */
+        #joueur {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #00bcd4;
+            border-radius: 50%;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            z-index: 10;
+        }
+
+        /* Le Ballon */
+        #ballon {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            z-index: 5;
+        }
+
+        /* Pavé Tactile Jaune */
+        #manette {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 10px;
+            background-color: #ffeb3b;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-dir {
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-dir:active {
+            background-color: #555;
+        }
+
+        .vide {
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="score-board">Score : <span id="score">0</span></div>
+
+    <div id="terrain">
+        <div id="joueur">🥾</div>
+        <div id="ballon">⚽</div>
+        <div id="but"></div>
+    </div>
+
+    <div id="manette">
+        <div class="vide"></div>
+        <button class="btn-dir" onclick="bouger('haut')">▲</button>
+        <div class="vide"></div>
+        <button class="btn-dir" onclick="bouger('gauche')">◀</button>
+        <div class="vide"></div>
+        <button class="btn-dir" onclick="bouger('droite')">▶</button>
+        <div class="vide"></div>
+        <button class="btn-dir" onclick="bouger('bas')">▼</button>
+        <div class="vide"></div>
+    </div>
+
+    <script>
+        let score = 0;
+
+        // Positions en pourcentage du terrain
+        let joueurX = 15;
+        let joueurY = 45;
+
+        let ballonX = 50;
+        let ballonY = 45;
+
+        const joueur = document.getElementById('joueur');
+        const ballon = document.getElementById('ballon');
+        const scoreDisplay = document.getElementById('score');
+
+        function actualiserPositions() {
+            joueur.style.left = joueurX + '%';
+            joueur.style.top = joueurY + '%';
+            ballon.style.left = ballonX + '%';
+            ballon.style.top = ballonY + '%';
+        }
+
+        function bouger(direction) {
+            let vitesseBottes = 7; // Super vitesse !
+
+            if (direction === 'haut' && joueurY > 5) joueurY -= vitesseBottes;
+            if (direction === 'bas' && joueurY < 85) joueurY += vitesseBottes;
+            if (direction === 'gauche' && joueurX > 3) joueurX -= vitesseBottes;
+            if (direction === 'droite' && joueurX < 92) joueurX += vitesseBottes;
+
+            // Détection du contact avec le ballon
+            let distanceX = Math.abs(joueurX - ballonX);
+            let distanceY = Math.abs(joueurY - ballonY);
+
+            if (distanceX < 6 && distanceY < 6) {
+                // Le joueur pousse le ballon
+                if (direction === 'haut' && ballonY > 5) ballonY -= 14;
+                if (direction === 'bas' && ballonY < 85) ballonY += 14;
+                if (direction === 'gauche' && ballonX > 3) ballonX -= 14;
+                if (direction === 'droite' && ballonX < 92) ballonX += 14;
+                
+                // Vérification du But (Zone droite entre 30% et 70% de hauteur)
+                if (ballonX >= 88 && ballonY >= 30 && ballonY <= 70) {
+                    score++;
+                    scoreDisplay.innerText = score;
+                    alert("⚽ GOAAAAL !");
+                    // Reset au milieu
+                    joueurX = 15; joueurY = 45;
+                    ballonX = 50; ballonY = 45;
+                }
+            }
+
+            actualiserPositions();
+        }
+
+        // Lancement au chargement
+        actualiserPositions();
+    </script>
+</body>
+</html>
