@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Jeu de Foot - Bottes de Vitesse</title>
+    <title>Yam foot</title>
     <style>
         body {
             margin: 0;
@@ -17,193 +17,298 @@
             height: 100vh;
             overflow: hidden;
             color: white;
+            user-select: none;
+        }
+
+        h1 {
+            margin: 5px 0;
+            font-size: 22px;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 3px black;
         }
 
         #score-board {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 20px;
+            margin-bottom: 5px;
             font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 10px;
         }
 
-        /* Le Terrain de Foot */
+        /* Terrain FIFA Style */
         #terrain {
             position: relative;
-            width: 90vw;
-            height: 50vh;
-            background-color: #4CAF50;
-            border: 4px solid white;
-            border-radius: 8px;
+            width: 95vw;
+            height: 45vh;
+            background-color: #388E3C;
+            border: 3px solid white;
+            border-radius: 5px;
             overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
         }
 
-        /* Ligne centrale */
+        /* Ligne centrale et rond central */
         #terrain::before {
             content: '';
             position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            background-color: white;
+            top: 0; bottom: 0; left: 50%;
+            width: 3px; background-color: white;
             transform: translateX(-50%);
         }
-
-        /* Le But à droite */
-        #but {
+        #rond-central {
             position: absolute;
-            right: 0;
-            top: 30%;
-            width: 20px;
-            height: 40%;
-            border-left: 4px solid white;
-            border-top: 4px solid white;
-            border-bottom: 4px solid white;
-            background-color: rgba(255, 255, 255, 0.2);
+            top: 50%; left: 50%;
+            width: 70px; height: 70px;
+            border: 3px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
         }
 
-        /* Le Joueur */
-        #joueur {
+        /* Les Buts */
+        .but {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background-color: #00bcd4;
-            border-radius: 50%;
-            font-size: 20px;
+            width: 15px;
+            height: 30%;
+            top: 35%;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 3px solid white;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
-            z-index: 10;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        #but-gauche { left: 0; border-left: none; }
+        #but-droite { right: 0; border-right: none; }
+
+        /* Éléments du jeu */
+        .entite {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: left 0.05s linear, top 0.05s linear;
         }
 
-        /* Le Ballon */
+        #joueur { background-color: #00E5FF; border: 2px solid white; box-shadow: 0 0 8px #00E5FF; z-index: 10; }
+        .bot { background-color: #FF1744; border: 2px solid white; box-shadow: 0 0 8px #FF1744; z-index: 9; }
+        
         #ballon {
             position: absolute;
-            width: 25px;
-            height: 25px;
+            width: 20px;
+            height: 20px;
             background-color: white;
             border-radius: 50%;
-            font-size: 16px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
-            z-index: 5;
+            transition: left 0.05s linear, top 0.05s linear;
+            z-index: 8;
+            box-shadow: 1px 1px 3px black;
         }
 
-        /* Pavé Tactile Jaune */
+        /* Manette Tactile Jaune */
         #manette {
-            margin-top: 20px;
+            margin-top: 15px;
             display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(3, 60px);
-            gap: 10px;
+            grid-template-columns: repeat(3, 55px);
+            grid-template-rows: repeat(3, 55px);
+            gap: 8px;
             background-color: #ffeb3b;
-            padding: 15px;
+            padding: 12px;
             border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
         .btn-dir {
-            background-color: #333;
+            background-color: #212121;
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 20px;
-            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
 
-        .btn-dir:active {
-            background-color: #555;
-        }
-
-        .vide {
-            background: transparent;
-        }
+        .btn-dir:active { background-color: #616161; }
+        .vide { background: transparent; }
     </style>
 </head>
 <body>
 
-    <div id="score-board">Score : <span id="score">0</span></div>
+    <h1>⚽ Yam foot ⚽</h1>
+    <div id="score-board">Toi : <span id="score-joueur">0</span> | Bots Forts : <span id="score-bots">0</span></div>
 
     <div id="terrain">
-        <div id="joueur">🥾</div>
+        <div id="rond-central"></div>
+        <div id="but-gauche" class="but"></div>
+        <div id="but-droite" class="but"></div>
+        
+        <div id="joueur" class="entite">🏃‍♂️</div>
+        <div id="bot1" class="entite bot">🤖</div>
+        <div id="bot2" class="entite bot">🤖</div>
         <div id="ballon">⚽</div>
-        <div id="but"></div>
     </div>
 
     <div id="manette">
         <div class="vide"></div>
-        <button class="btn-dir" onclick="bouger('haut')">▲</button>
+        <button class="btn-dir" ontouchstart="lancerMouvement('haut')" ontouchend="stopperMouvement()">▲</button>
         <div class="vide"></div>
-        <button class="btn-dir" onclick="bouger('gauche')">◀</button>
+        <button class="btn-dir" ontouchstart="lancerMouvement('gauche')" ontouchend="stopperMouvement()">◀</button>
         <div class="vide"></div>
-        <button class="btn-dir" onclick="bouger('droite')">▶</button>
+        <button class="btn-dir" ontouchstart="lancerMouvement('droite')" ontouchend="stopperMouvement()">▶</button>
         <div class="vide"></div>
-        <button class="btn-dir" onclick="bouger('bas')">▼</button>
+        <button class="btn-dir" ontouchstart="lancerMouvement('bas')" ontouchend="stopperMouvement()">▼</button>
         <div class="vide"></div>
     </div>
 
     <script>
-        let score = 0;
+        let scoreToi = 0;
+        let scoreBots = 0;
 
-        // Positions en pourcentage du terrain
-        let joueurX = 15;
-        let joueurY = 45;
+        // Positions de départ (en %)
+        let joueur = { x: 20, y: 45 };
+        let ballon = { x: 50, y: 45, vx: 0, vy: 0 };
+        
+        // Liste des Bots "Forts"
+        let bots = [
+            { id: 'bot1', x: 70, y: 30, vitesse: 1.4 },
+            { id: 'bot2', x: 70, y: 60, vitesse: 1.4 }
+        ];
 
-        let ballonX = 50;
-        let ballonY = 45;
+        let directionActuelle = null;
+        let intervalleMouvement = null;
 
-        const joueur = document.getElementById('joueur');
-        const ballon = document.getElementById('ballon');
-        const scoreDisplay = document.getElementById('score');
+        function actualiserInterface() {
+            document.getElementById('joueur').style.left = joueur.x + '%';
+            document.getElementById('joueur').style.top = joueur.y + '%';
+            
+            document.getElementById('ballon').style.left = ballon.x + '%';
+            document.getElementById('ballon').style.top = ballon.y + '%';
 
-        function actualiserPositions() {
-            joueur.style.left = joueurX + '%';
-            joueur.style.top = joueurY + '%';
-            ballon.style.left = ballonX + '%';
-            ballon.style.top = ballonY + '%';
+            bots.forEach(b => {
+                let el = document.getElementById(b.id);
+                if(el) {
+                    el.style.left = b.x + '%';
+                    el.style.top = b.y + '%';
+                }
+            });
         }
 
-        function bouger(direction) {
-            let vitesseBottes = 7; // Super vitesse !
+        // Gérer les déplacements continus sur mobile
+        function lancerMouvement(dir) {
+            directionActuelle = dir;
+            if (!intervalleMouvement) {
+                intervalleMouvement = setInterval(executerMouvement, 30);
+            }
+        }
 
-            if (direction === 'haut' && joueurY > 5) joueurY -= vitesseBottes;
-            if (direction === 'bas' && joueurY < 85) joueurY += vitesseBottes;
-            if (direction === 'gauche' && joueurX > 3) joueurX -= vitesseBottes;
-            if (direction === 'droite' && joueurX < 92) joueurX += vitesseBottes;
+        function stopperMouvement() {
+            directionActuelle = null;
+            clearInterval(intervalleMouvement);
+            intervalleMouvement = null;
+        }
 
-            // Détection du contact avec le ballon
-            let distanceX = Math.abs(joueurX - ballonX);
-            let distanceY = Math.abs(joueurY - ballonY);
+        function executerMouvement() {
+            let v = 2; // Vitesse de déplacement du joueur
+            if (directionActuelle === 'haut' && joueur.y > 2) joueur.y -= v;
+            if (directionActuelle === 'bas' && joueur.y < 88) joueur.y += v;
+            if (directionActuelle === 'gauche' && joueur.x > 2) joueur.x -= v;
+            if (directionActuelle === 'droite' && joueur.x < 93) joueur.x += v;
+            
+            verifierContact(joueur, true);
+        }
 
-            if (distanceX < 6 && distanceY < 6) {
-                // Le joueur pousse le ballon
-                if (direction === 'haut' && ballonY > 5) ballonY -= 14;
-                if (direction === 'bas' && ballonY < 85) ballonY += 14;
-                if (direction === 'gauche' && ballonX > 3) ballonX -= 14;
-                if (direction === 'droite' && ballonX < 92) ballonX += 14;
-                
-                // Vérification du But (Zone droite entre 30% et 70% de hauteur)
-                if (ballonX >= 88 && ballonY >= 30 && ballonY <= 70) {
-                    score++;
-                    scoreDisplay.innerText = score;
-                    alert("⚽ GOAAAAL !");
-                    // Reset au milieu
-                    joueurX = 15; joueurY = 45;
-                    ballonX = 50; ballonY = 45;
+        // Vérifie si un joueur ou un bot touche la balle
+        function verifierContact(entite, estJoueur) {
+            let dx = entite.x - ballon.x;
+            let dy = entite.y - ballon.y;
+            let distance = Math.sqrt(dx*dx + dy*dy);
+
+            if (distance < 5) {
+                // Force et direction de la frappe
+                let force = 4;
+                if (estJoueur) {
+                    if (directionActuelle === 'droite') { ballon.vx = force; ballon.vy = 0; }
+                    else if (directionActuelle === 'gauche') { ballon.vx = -force; ballon.vy = 0; }
+                    else if (directionActuelle === 'haut') { ballon.vx = 0; ballon.vy = -force; }
+                    else if (directionActuelle === 'bas') { ballon.vx = 0; ballon.vy = force; }
+                    else { ballon.vx = (ballon.x - entite.x) * 0.5; ballon.vy = (ballon.y - entite.y) * 0.5; }
+                } else {
+                    // Le bot tire directement vers ton but (à gauche)
+                    ballon.vx = -force;
+                    ballon.vy = (45 - ballon.y) * 0.1;
+                }
+            }
+        }
+
+        // Boucle principale de l'IA FIFA et de la physique de la balle
+        function boucleJeu() {
+            // 1. Friction et déplacement de la balle
+            ballon.x += ballon.vx;
+            ballon.y += ballon.vy;
+            ballon.vx *= 0.85; // La balle ralentit d'elle-même
+            ballon.vy *= 0.85;
+
+            // Limites des murs pour la balle
+            if (ballon.y <= 2 || ballon.y >= 90) ballon.vy *= -1;
+            if (ballon.x <= 2 || ballon.x >= 94) {
+                // Si elle sort mais pas dans les buts
+                if (ballon.y < 35 || ballon.y > 65) {
+                    ballon.vx *= -1;
                 }
             }
 
-            actualiserPositions();
+            // 2. Intelligence Artificielle des Bots (Ils chassent activement la balle)
+            bots.forEach(b => {
+                let dx = ballon.x - b.x;
+                let dy = ballon.y - b.y;
+                let distBalle = Math.sqrt(dx*dx + dy*dy);
+
+                if (distBalle > 2) {
+                    b.x += (dx / distBalle) * b.vitesse;
+                    b.y += (dy / distBalle) * b.vitesse;
+                }
+                verifierContact(b, false);
+            });
+
+            // 3. Vérification des Buts (Entre 35% et 65% de hauteur)
+            if (ballon.y >= 35 && ballon.y <= 65) {
+                if (ballon.x >= 93) { // But pour Toi !
+                    scoreToi++;
+                    document.getElementById('score-joueur').innerText = scoreToi;
+                    reinitialiser('⚽ GOAL POUR YAM !');
+                } else if (ballon.x <= 2) { // But pour l'IA !
+                    scoreBots++;
+                    document.getElementById('score-bots').innerText = scoreBots;
+                    reinitialiser('❌ BUT DE L\'IA !');
+                }
+            }
+
+            actualiserInterface();
         }
 
-        // Lancement au chargement
-        actualiserPositions();
+        function reinitialiser(message) {
+            alert(message);
+            joueur = { x: 20, y: 45 };
+            ballon = { x: 50, y: 45, vx: 0, vy: 0 };
+            bots[0].x = 70; bots[0].y = 30;
+            bots[1].x = 70; bots[1].y = 60;
+            stopperMouvement();
+            actualiserInterface();
+        }
+
+        // Lancer la boucle de jeu automatique
+        setInterval(boucleJeu, 40);
+        actualiserInterface();
     </script>
 </body>
 </html>
